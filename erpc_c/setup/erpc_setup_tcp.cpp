@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 (c) Sierra Wireless
+ * Copyright 2021 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -7,8 +7,8 @@
  */
 
 #include "erpc_manually_constructed.h"
-#include "erpc_transport_setup.h"
 #include "erpc_tcp_transport.h"
+#include "erpc_transport_setup.h"
 
 using namespace erpc;
 
@@ -22,34 +22,24 @@ static ManuallyConstructed<TCPTransport> s_transport;
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
-erpc_transport_t erpc_transport_tcp_init_full(const char *host, uint16_t port, bool isServer)
+erpc_transport_t erpc_transport_tcp_init(const char *host, uint16_t port, bool isServer)
 {
+    erpc_transport_t transport;
+
     s_transport.construct(host, port, isServer);
-    if (kErpcStatus_Success == s_transport->open()) 
+    if (kErpcStatus_Success == s_transport->open())
     {
-        return reinterpret_cast<erpc_transport_t>(s_transport.get());
-    }    
-    return NULL;    
-}
+        transport = reinterpret_cast<erpc_transport_t>(s_transport.get());
+    }
+    else
+    {
+        transport = NULL;
+    }
 
-erpc_transport_t erpc_transport_tcp_init(bool isServer)
-{
-    s_transport.construct(isServer);
-    return reinterpret_cast<erpc_transport_t>(s_transport.get());
-}
-
-bool erpc_transport_tcp_open(void)
-{
-    return s_transport.get()->open() == kErpcStatus_Success;
+    return transport;
 }
 
 void erpc_transport_tcp_close(void)
 {
     s_transport.get()->close(true);
 }
-
-void erpc_transport_tcp_configure(const char *host, uint16_t port)
-{
-    s_transport.get()->configure(host, port);
-}
-

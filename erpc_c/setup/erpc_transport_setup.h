@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2014-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2020 NXP
+ * Copyright 2016-2021 NXP
+ * Copyright 2019 ACRIOS Systems s.r.o.
  * All rights reserved.
  *
  *
@@ -33,6 +34,7 @@ typedef void (*rpmsg_ready_cb)(void);
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -188,6 +190,22 @@ erpc_transport_t erpc_transport_spi_master_espidf_init(void *spi, int spi_num, i
 erpc_transport_t erpc_transport_spi_slave_espidf_init(void *spi, int spi_num, int cs_gpio, int ready_gpio, int timeout);
 //@}
 
+//! @name SPIdev transport setup
+//@{
+
+/*!
+ * @brief Create a SPIdev transport.
+ *
+ * Create SPIdev master transport instance, to be used at master core.
+ *
+ * @param[in] spidev SPI device name.
+ * @param[in] speed_Hz SPI clock speed in Hz.
+ *
+ * @return Return NULL or erpc_transport_t instance pointer.
+ */
+erpc_transport_t erpc_transport_spidev_master_init(const char *spidev, uint32_t speed_Hz);
+//@}
+
 //! @name MU transport setup
 //@{
 
@@ -319,7 +337,7 @@ void erpc_transport_rpmsg_lite_tty_rtos_deinit(void);
  * @brief Create an Linux RPMSG endpoint transport.
  *
  * This function is using RPMSG endpoints based on this implementation:
- * https://github.com/NXPmicro/rpmsg-sysfs/tree/0aa1817545a765c200b1b2f9b6680a420dcf9171 .
+ * github.com/NXPmicro/rpmsg-sysfs/tree/0aa1817545a765c200b1b2f9b6680a420dcf9171 .
  *
  * When local/remote address is set to '-1', then default addresses will be used.
  * When type is set to '0', then Datagram model will be used, else Stream.
@@ -342,7 +360,7 @@ void erpc_transport_rpmsg_linux_deinit(void);
 
 //! @name TCP transport setup
 //@{
-    
+
 /*!
  * @brief Create and open TCP transport
  *
@@ -355,52 +373,64 @@ void erpc_transport_rpmsg_linux_deinit(void);
  *
  * @return Return NULL or erpc_transport_t instance pointer.
  */
-erpc_transport_t erpc_transport_tcp_init_full(const char *host, uint16_t port, bool isServer);
-
-/*!
- * @brief Create and configure TCP transport but do not open anything
- *
- * Parameters are simply memorized to be used with further init() and open()
- *
- * @param[in] host hostname/IP address to listen on or server to connect to
- * @param[in] port port to listen on or server to connect to
- *
- */
-void erpc_transport_tcp_configure(const char *host, uint16_t port);
-
-/*!
- * @brief Create a TCP transport
- *
- * Simply create transport instance, don't start anything
- * @param[in] isServer true if we are a server
- *
- * @return Return NULL or erpc_transport_t instance pointer.
- */
-erpc_transport_t erpc_transport_tcp_init(bool isServer);
-
-/*!
- * @brief Open TCP connection
- *
- * For server, create a TCP listen socket and wait for connections
- * For client, connect to server
- *
- * @return Return TRUE if listen/connection successful
- */
-bool erpc_transport_tcp_open(void);
+erpc_transport_t erpc_transport_tcp_init(const char *host, uint16_t port, bool isServer);
 
 /*!
  * @brief Close TCP connection
  *
- * For server, stop listening and close all sockets. Note that the server mode 
+ * For server, stop listening and close all sockets. Note that the server mode
  * uses and accept() which is a not-recommended blocking method so we can't exit
  * until a connection attempts is made. This is a deadlock but assuming that TCP
  * code is supposed to be for test, I assume it's acceptable. Otherwise a non-blocking
- * socket or select() shoudl be used 
+ * socket or select() shoudl be used
  * For client, close server connection
  *
  * @return Return TRUE if listen/connection successful
  */
 void erpc_transport_tcp_close(void);
+//@}
+
+//! @name USB CDC transport setup
+//@{
+
+/*!
+ * @brief Create an USB CDC transport.
+ *
+ * Create an USB CDC transport instance.
+ *
+ * @param[in] serialHandle Pointer to point to a memory space of size #SERIAL_MANAGER_HANDLE_SIZE allocated by the
+ * caller, see serial manager header file.
+ * @param[in] serialConfig Pointer to user-defined configuration structure allocated by the caller, see serial manager
+ * header file.
+ * @param[in] usbCdcConfig Pointer to serial port usb config structure allocated by the caller, see serial manager
+ * header file.
+ * @param[in] usbRingBuffer Pointer to point serial manager ring buffer allocated by the caller, see serial manager
+ * header file.
+ * @param[in] usbRingBufferLength Serial manager ring buffer size.
+ *
+ * @return Return NULL or erpc_transport_t instance pointer.
+ */
+erpc_transport_t erpc_transport_usb_cdc_init(void *serialHandle, void *serialConfig, void *usbCdcConfig,
+                                             uint8_t *usbRingBuffer, uint32_t usbRingBufferLength);
+//@}
+
+//! @name I2C transport setup
+//@{
+
+/*!
+ * @brief Create an I2C slave transport.
+ *
+ * Create I2C slave transport instance, to be used at slave core.
+ *
+ * @param[in] baseAddr Base address of I2C peripheral used in this transport layer.
+ * @param[in] baudRate SPI baud rate.
+ * @param[in] srcClock_Hz I2C source clock in Hz.
+ *
+ * @return Return NULL or erpc_transport_t instance pointer.
+ */
+erpc_transport_t erpc_transport_i2c_slave_init(void *baseAddr, uint32_t baudRate, uint32_t srcClock_Hz);
+//@}
+
 //@}
 
 #ifdef __cplusplus

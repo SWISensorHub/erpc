@@ -8,6 +8,7 @@
  */
 
 #include "InterfaceDefinition.h"
+
 #include "AstNode.h"
 #include "AstWalker.h"
 #include "ErpcLexer.h"
@@ -29,10 +30,10 @@ using namespace std;
 InterfaceDefinition::InterfaceDefinition()
 : m_ast(nullptr)
 , m_globals()
+, m_program(nullptr)
 , m_programName("")
 , m_outputFilename("")
 , m_codec(kNotSpecified)
-, m_program(nullptr)
 {
     init();
 }
