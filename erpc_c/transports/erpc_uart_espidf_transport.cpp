@@ -80,7 +80,7 @@ erpc_status_t UartTransport::init(int timeout)
         return kErpcStatus_InitFailed;
     }
 
-    return ESP_OK;
+    return kErpcStatus_Success;
 }
 
 erpc_status_t UartTransport::underlyingReceive(uint8_t *data, uint32_t size)
