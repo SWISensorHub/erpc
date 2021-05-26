@@ -50,7 +50,7 @@ Thread::Thread(thread_entry_t entry, uint32_t priority, uint32_t stackSize, cons
 : m_name(name)
 , m_entry(entry)
 , m_arg(0)
-, m_stackSize(stackSize < 4096 ? 4096 : stackSize)
+, m_stackSize(stackSize)
 , m_priority(priority)
 , m_task(0)
 , m_next(0)
@@ -62,7 +62,7 @@ Thread::~Thread(void) {}
 void Thread::init(thread_entry_t entry, uint32_t priority, uint32_t stackSize)
 {
     m_entry = entry;
-    m_stackSize = stackSize < 4096 ? 4096 : stackSize;
+    m_stackSize = stackSize;
     m_priority = priority;
 }
 
